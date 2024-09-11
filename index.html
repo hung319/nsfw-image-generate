@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tải ảnh NSFW</title>
+    <title>Tải ảnh Anime</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,7 +26,7 @@
     </style>
 </head>
 <body>
-    <h1>Tải ảnh NSFW</h1>
+    <h1>Tải ảnh Anime</h1>
     <label for="imageCount">Số lượng ảnh tải xuống:</label>
     <input type="number" id="imageCount" value="5" min="1" max="100">
     <button id="downloadBtn">Tải ảnh và nén ZIP</button>
@@ -37,7 +36,7 @@
         const downloadBtn = document.getElementById('downloadBtn');
         const status = document.getElementById('status');
         const imageCountInput = document.getElementById('imageCount');
-        const CONCURRENT_LIMIT = 5; // Giới hạn số lượng tải đồng thời
+        const CONCURRENT_LIMIT = 5;
 
         // Hàm tạo chuỗi ngẫu nhiên từ chữ hoa, chữ thường và số
         const generateRandomString = (length) => {
@@ -51,10 +50,9 @@
 
         const fetchImage = async () => {
             try {
-                // Gọi API mới
-                const response = await axios.get('https://api.waifu.pics/nsfw/waifu');
-                
-                const imageUrl = response.data.url;
+                const response = await fetch('https://waifu.pics/api/nsfw/waifu');
+                const data = await response.json();
+                const imageUrl = data.url;
                 const imageResponse = await fetch(imageUrl);
                 const imageBlob = await imageResponse.blob();
 
@@ -99,10 +97,12 @@
 
             try {
                 const zipBlob = await downloadImages(imagesToDownload);
-                // Đặt tên file zip ngẫu nhiên
-                const zipFileName = generateRandomString(10) + '.zip';
-                saveAs(zipBlob, zipFileName);
-                status.textContent = 'Đã tải xong! Kiểm tra file ZIP của bạn.';
+
+                // Tạo tên ngẫu nhiên cho file ZIP
+                const randomZipName = generateRandomString(10) + '.zip';
+                saveAs(zipBlob, randomZipName);
+
+                status.textContent = `Đã tải xong! Kiểm tra file ZIP (${randomZipName}) của bạn.`;
             } catch (error) {
                 status.textContent = 'Đã xảy ra lỗi khi tải ảnh.';
             }
