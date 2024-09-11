@@ -37,8 +37,7 @@
         const downloadBtn = document.getElementById('downloadBtn');
         const status = document.getElementById('status');
         const imageCountInput = document.getElementById('imageCount');
-        const CONCURRENT_LIMIT = 5;
-        const API_TOKEN = "ceeWre9K0G-ATBNUNeb3J1UeHpgFgZu-p7N7HCc7tM";  // Thay bằng token API của bạn
+        const CONCURRENT_LIMIT = 5; // Giới hạn số lượng tải đồng thời
 
         // Hàm tạo chuỗi ngẫu nhiên từ chữ hoa, chữ thường và số
         const generateRandomString = (length) => {
@@ -52,11 +51,8 @@
 
         const fetchImage = async () => {
             try {
-                const response = await axios.get('https://api.night-api.com/images/nsfw', {
-                    headers: {
-                        authorization: API_TOKEN
-                    }
-                });
+                // Gọi API mới
+                const response = await axios.get('https://api.waifu.pics/nsfw/waifu');
                 
                 const imageUrl = response.data.url;
                 const imageResponse = await fetch(imageUrl);
@@ -103,12 +99,10 @@
 
             try {
                 const zipBlob = await downloadImages(imagesToDownload);
-
-                // Tạo tên ngẫu nhiên cho file ZIP
-                const randomZipName = generateRandomString(10) + '.zip';
-                saveAs(zipBlob, randomZipName);
-
-                status.textContent = `Đã tải xong! Kiểm tra file ZIP (${randomZipName}) của bạn.`;
+                // Đặt tên file zip ngẫu nhiên
+                const zipFileName = generateRandomString(10) + '.zip';
+                saveAs(zipBlob, zipFileName);
+                status.textContent = 'Đã tải xong! Kiểm tra file ZIP của bạn.';
             } catch (error) {
                 status.textContent = 'Đã xảy ra lỗi khi tải ảnh.';
             }
