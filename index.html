@@ -39,6 +39,7 @@
         const imageCountInput = document.getElementById('imageCount');
         const CONCURRENT_LIMIT = 5;
         const API_KEY = 'ceeWre9K0G-ATBNUNeb3J1UeHpgFgZu-p7N7HCc7tM';
+        const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 
         const generateRandomString = (length) => {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -51,9 +52,10 @@
 
         const fetchImage = async () => {
             try {
-                const response = await axios.get('https://api.night-api.com/images/nsfw', {
+                const response = await axios.get(`${CORS_PROXY}https://api.night-api.com/images/nsfw`, {
                     headers: {
-                        authorization: API_KEY
+                        'authorization': API_KEY,
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
                 const imageUrl = response.data.content.url;
@@ -64,7 +66,15 @@
                 return { imageBlob, fileName };
             } catch (error) {
                 console.error('Lỗi khi tải ảnh:', error);
-                return null;
+                if (error.response) {
+                    console.error('Phản hồi lỗi:', error.response.data);
+                    console.error('Mã trạng thái:', error.response.status);
+                } else if (error.request) {
+                    console.error('Không nhận được phản hồi:', error.request);
+                } else {
+                    console.error('Lỗi:', error.message);
+                }
+                throw error;
             }
         };
 
@@ -85,6 +95,9 @@
                         completed++;
                         status.textContent = `Đã tải ${completed}/${count} ảnh`;
                     }
+                }).catch(error => {
+                    console.error('Lỗi khi tải ảnh:', error);
+                    status.textContent = `Lỗi khi tải ảnh ${i + 1}. Đang tiếp tục...`;
                 });
 
                 promises.push(imagePromise);
@@ -106,7 +119,8 @@
 
                 status.textContent = `Đã tải xong! Kiểm tra file ZIP (${randomZipName}) của bạn.`;
             } catch (error) {
-                status.textContent = 'Đã xảy ra lỗi khi tải ảnh.';
+                status.textContent = 'Đã xảy ra lỗi khi tải ảnh. Vui lòng thử lại sau.';
+                console.error('Lỗi:', error);
             }
         });
     </script>
