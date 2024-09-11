@@ -38,6 +38,7 @@
         const imageCountInput = document.getElementById('imageCount');
         const CONCURRENT_LIMIT = 5;
         const API_URL = 'https://waifu.pics/api/nsfw/waifu';
+        const WORKER_URL = 'https://lucky-smoke-b1c0.hoangxg4.workers.dev/?apiUrl=';
 
         const generateRandomString = (length) => {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -48,18 +49,28 @@
             return result;
         };
 
-        const fetchImage = async () => {
+        const fetchWithRetry = async (url, options, retries = 3) => {
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(url, options);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return response;
+            } catch (error) {
+                if (retries > 0) {
+                    console.log(`Retry attempt ${4 - retries}...`);
+                    return fetchWithRetry(url, options, retries - 1);
+                }
+                throw error;
+            }
+        };
+
+        const fetchImage = async () => {
+            try {
+                const response = await fetchWithRetry(`${WORKER_URL}${encodeURIComponent(API_URL)}`);
                 const data = await response.json();
                 const imageUrl = data.url;
-                const imageResponse = await fetch(imageUrl);
-                if (!imageResponse.ok) {
-                    throw new Error(`HTTP error! status: ${imageResponse.status}`);
-                }
+                const imageResponse = await fetchWithRetry(`${WORKER_URL}${encodeURIComponent(imageUrl)}`);
                 const imageBlob = await imageResponse.blob();
 
                 const fileName = imageUrl.split('/').pop();
