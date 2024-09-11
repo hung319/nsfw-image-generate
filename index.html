@@ -6,7 +6,6 @@
     <title>Tải ảnh Anime</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,31 +32,24 @@
     <button id="downloadBtn">Tải ảnh và nén ZIP</button>
     <div id="status"></div>
 
-    <script>
+    <script type="module">
+        import { NightAPI } from 'https://unpkg.com/night-api/dist/index.esm.js';
+
         const downloadBtn = document.getElementById('downloadBtn');
         const status = document.getElementById('status');
         const imageCountInput = document.getElementById('imageCount');
         const CONCURRENT_LIMIT = 5;
-        const API_TOKEN = 'ceeWre9K0G-ATBNUNeb3J1UeHpgFgZu-p7N7HCc7tM';
+        const API_KEY = 'YOUR_API_KEY'; // Thay thế bằng API key của bạn
+
+        const api = new NightAPI(API_KEY);
 
         const fetchImage = async () => {
             try {
-                const response = await axios.get('https://api.night-api.com/images/nsfw', {
-                    headers: {
-                        'Authorization': `Bearer ${API_TOKEN}`
-                    }
-                });
-
-                if (response.data.status === 200) {
-                    const imageUrl = response.data.content.url;
-                    const imageResponse = await fetch(imageUrl);
-                    const imageBlob = await imageResponse.blob();
-                    const fileName = imageUrl.split('/').pop();
-                    return { imageBlob, fileName };
-                } else {
-                    console.error('Lỗi khi tải ảnh:', response.data.content);
-                    return null;
-                }
+                const image = await api.nsfw.fetchImage();
+                return {
+                    imageBlob: await image.blob(),
+                    fileName: `${image.id}.jpg`
+                };
             } catch (error) {
                 console.error('Lỗi khi tải ảnh:', error);
                 return null;
